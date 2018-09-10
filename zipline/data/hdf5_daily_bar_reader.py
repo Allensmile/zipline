@@ -194,7 +194,13 @@ class HDF5DailyBarReader(SessionBarReader):
             If the given dt is not a valid market minute (in minute mode) or
             session (in daily mode) according to this reader's tradingcalendar.
         """
-        return np.ravel(self.load_raw_arrays([field], dt, dt, [sid]))[0]
+        sid_ix = self._sids(country).searchsorted(sid)
+        dt_ix = self._dates(country).searchsorted(dt.asm8)
+
+        return self._postprocessors[country][field](
+            self._file[country][DATA][field][sid_ix, dt_ix]
+        )
+
 
     def get_last_traded_dt(self, asset, dt):
         """
