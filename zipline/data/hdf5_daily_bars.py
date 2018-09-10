@@ -70,7 +70,7 @@ class HDF5DailyBarWriter(object):
 
     @property
     def _h5_file(self):
-        return h5py.File(self._filename, 'w')
+        return h5py.File(self._filename, 'a')
 
     def write(self, country_code, frame):
         """
