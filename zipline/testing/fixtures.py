@@ -1180,7 +1180,7 @@ class WithHDF5EquityDailyBarReader(WithEquityDailyBarData, WithTmpDir):
 
     @classmethod
     def make_hdf5_daily_bar_path(cls):
-        return cls.tmpdir.makedir(cls.HDF5_DAILY_BAR_PATH)
+        return cls.tmpdir.getpath(cls.HDF5_DAILY_BAR_PATH)
 
     @classmethod
     def init_class_fixtures(cls):
@@ -1188,11 +1188,20 @@ class WithHDF5EquityDailyBarReader(WithEquityDailyBarData, WithTmpDir):
 
         cls.hdf5_daily_bar_path = p = cls.make_hdf5_daily_bar_path()
 
-        f = HDF5DailyBarWriter(p, date_chunk_size=30).write(
-            cls.make_equity_daily_bar_data(),
-        )
+        frame = pd.concat([
+            (df.reset_index()
+               .rename(columns={'index': 'date'})
+               .assign(sid=sid)
+               .set_index(['sid', 'date']))
+            for sid, df in cls.make_equity_daily_bar_data()
+        ])
 
-        cls.hdf5_equity_daily_bar_reader = HDF5DailyBarReader(f)
+        f = HDF5DailyBarWriter(p, date_chunk_size=30).write('US', frame)
+
+        cls.hdf5_equity_daily_bar_reader = HDF5DailyBarReader(
+            f=f,
+            calendar=cls.trading_calendar,
+        )
 
 
 class WithEquityMinuteBarData(WithAssetFinder, WithTradingCalendars):
