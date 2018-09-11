@@ -1205,6 +1205,7 @@ class WithHDF5EquityDailyBarReader(WithEquityDailyBarData, WithTmpDir):
         )
 
         cls.hdf5_equity_daily_bar_reader = HDF5DailyBarReader(
+            country_code=cls.HDF5_DAILY_BAR_COUNTRY_CODE,
             country_group=f[cls.HDF5_DAILY_BAR_COUNTRY_CODE],
         )
 
